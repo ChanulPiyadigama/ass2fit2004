@@ -1,5 +1,5 @@
 import unittest
-from crowdedCampuss import crowdedCampus
+from CrowdedCampus import crowdedCampus
 
 class TestA2(unittest.TestCase):
     def validate_allocation(
@@ -333,3 +333,75 @@ class TestA2(unittest.TestCase):
         self.validate_allocation(
             n, m, time_preferences, proposed_classes, minimum_satisfaction, allocation
         )
+    def test_gc_1(self):
+        n = 4
+        m = 2
+        time_preferences = [[0] + list(range(1, 20)),
+                            [0] + list(range(1, 20)),
+                            [0] + list(range(1, 20)),
+                            [0] + list(range(1, 20))]
+        proposed_classes = [[0, 1, 20], [5, 3, 20]]
+        min_satisfaction = 1
+        allocation = crowdedCampus(n, m, time_preferences, proposed_classes, min_satisfaction)
+        self.validate_allocation(n, m, time_preferences, proposed_classes, min_satisfaction, allocation)
+        
+    def test_gc_2(self):
+        n = 7
+        m = 3
+        time_preferences = [[0] + list(range(1, 20)),
+                            [0] + list(range(1, 20)),
+                            [0] + list(range(1, 20)),
+                            [0] + list(range(1, 20)),
+                            [0] + list(range(1, 20)),
+                            [0] + list(range(1, 20)),
+                            [0] + list(range(1, 20))]
+
+        proposed_classes = [[0, 1, 20], [0, 3, 5] ,[5, 3, 20]]
+        min_satisfaction = 2
+        allocation = crowdedCampus(n, m, time_preferences, proposed_classes, min_satisfaction)
+        self.validate_allocation(n, m, time_preferences, proposed_classes, min_satisfaction, allocation)
+
+    def test_gc_3(self):
+        n = 6
+        m = 2
+        time_preferences = [list(range(0, 20))] * 6
+        proposed_classes = [[0, 5, 10], [5, 1, 10]]
+        minimum_satisfaction = 6
+        allocation = crowdedCampus(n, m, time_preferences, proposed_classes, minimum_satisfaction)
+        self.assertIsNone(allocation)
+    
+    def test_e_q1_1(self):
+        n = 3
+        m = 2
+        min_satisfaction = 3
+
+        import itertools
+        time_preferences_base = [
+            list(range(20)),
+            [1, 2, 17, 18, 19] + list(range(3, 17)) + [0],
+            [1, 16, 17, 18, 19] + list(range(2, 16)) + [0],
+        ]
+        proposed_classes_base = [[1, 1, 1], [2, 1, 2]]
+        for time_preferences in itertools.permutations(time_preferences_base):
+            for proposed_classes in itertools.permutations(proposed_classes_base):
+                allocation = crowdedCampus(n, m, time_preferences, proposed_classes, min_satisfaction)
+                self.validate_allocation(n, m, time_preferences, proposed_classes, min_satisfaction, allocation)
+
+    def test_e_q1_2(self):
+        n = 5
+        m = 2
+        time_preferences = [list(range(0, 20))] * 5
+        proposed_classes = [[0, 1, 10], [1, 4, 10]]
+        minimum_satisfaction = 4
+        # Sample output [0, 1, 1, 1, 1]
+        allocation = crowdedCampus(n, m, time_preferences, proposed_classes, minimum_satisfaction)
+        self.validate_allocation(n, m, time_preferences, proposed_classes, minimum_satisfaction, allocation)
+
+    def test_e_q1_3(self):
+        n = 10
+        m = 3
+        time_preferences = [list(range(0, 20))] * 9 + [[5] + [0, 1, 2, 3, 4] + list(range(6, 20))]
+        proposed_classes = [[0, 4, 10], [5, 1, 10], [6, 3, 10]]
+        minimum_satisfaction = 6
+        allocation = crowdedCampus(n, m, time_preferences, proposed_classes, minimum_satisfaction)
+        self.validate_allocation(n, m, time_preferences, proposed_classes, minimum_satisfaction, allocation)
