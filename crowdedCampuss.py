@@ -36,7 +36,7 @@ def crowdedCampus(n, m, timePreferences, proposedClasses, minimumSatisfaction):
         :Time complexity analysis: 
         For both complexities the most important thing to understand is the lowest min capacity for classes is 1, a class must have at least 1 student. 
         So if we check for this, the most number of classes is n, where we have to assign a single student to each class. 
-
+        
         based on this, our main time complexity is from our ford fulkerson function, which is O(n^2), and 
         any loops where we check each student against each class would also be O(n^2)
         :Space complexity: O(n)
@@ -47,7 +47,6 @@ def crowdedCampus(n, m, timePreferences, proposedClasses, minimumSatisfaction):
         n edges from classes to sink. 
         Overall is boiled down to O(n) space used. 
     """
-
 
     # Check basic requirements
     total_min_capacity = sum(proposedClasses[j][1] for j in range(m))
@@ -67,7 +66,7 @@ def crowdedCampus(n, m, timePreferences, proposedClasses, minimumSatisfaction):
     
     # Connect source to students with capacity 1, O(n)
     for i in range(n):
-        graph[source].append((i, 1))
+        graph[source].append([i, 1])
     
     # Connect students to preferred classes
     for i in range(n):
@@ -75,14 +74,14 @@ def crowdedCampus(n, m, timePreferences, proposedClasses, minimumSatisfaction):
         for j in range(m):
             if proposedClasses[j][0] in top_five_slots:
                 # Student i connects to class n+j
-                graph[i].append((n + j, 1))
-                break
+                graph[i].append([n + j, 1])
+                
         
     # Connect classes to sink
     for j in range(m):
         class_node = n + j
         max_capacity = proposedClasses[j][2]
-        graph[class_node].append((sink, max_capacity))
+        graph[class_node].append([sink, max_capacity])
 
     # Run Ford-Fulkerson to find and allocate max satisfied students
     phase1_assignments = [-1] * n  # allocation of students (to preferred classes)
@@ -90,7 +89,7 @@ def crowdedCampus(n, m, timePreferences, proposedClasses, minimumSatisfaction):
     satisfied_count = 0           # Count of satisfied students
 
     preferredMatches = space_efficient_ford_fulkerson(graph, source, sink)
-    print(preferredMatches)
+    
     #For every student, check which class they were assigned to
     for i in range(n):
         for edge in preferredMatches[i][:-1]:  # Skip the last edge, since thats the reverse edge to the source
@@ -174,7 +173,7 @@ def space_efficient_ford_fulkerson(graph, source, sink):
         only have n amount of students to assign once. The number of edges is : n (source to students) + 5n (if each student was connected to their 5 preferred classes) + n (classes to sink, the most classes we can have is equal to students since min capacity possible is 1 and sum of min caps =< n) = 7n = n
         therefore O(n^2) in the worst case.
         :Space complexity: O(n)
-        :Space complexity analysis: The residual graph takes up the most space, in the worst case we hold edges from students to their 5 preferred classes thus: 5n, edges from source to students n, and edges from classes to sink n. Thus the total space used is O(n).
+        :Space complexity analysis: The residual graph takes up the most space, in the worst case we hold edges from students to their 5 preferred classes thus: 5n, edges from source to students n, an
     """
     total_nodes = len(graph)
 
@@ -183,8 +182,8 @@ def space_efficient_ford_fulkerson(graph, source, sink):
     # For each edge in original graph, add forward and reverse edges
     for u in range(total_nodes):
         for v, capacity in graph[u]:
-            residual_graph[u].append((v, capacity))
-            residual_graph[v].append((u, 0))
+            residual_graph[u].append([v, capacity])
+            residual_graph[v].append([u, 0])
     
     # DFS to find augmenting path
     def dfs(u, visited, min_capacity_so_far):
@@ -195,7 +194,7 @@ def space_efficient_ford_fulkerson(graph, source, sink):
         visited[u] = True
         
         # Try all outgoing edges
-        for idx, (v, capacity) in enumerate(residual_graph[u]):
+        for idx, [v, capacity] in enumerate(residual_graph[u]):
             if not visited[v] and capacity > 0:
                 # Calculate new minimum capacity along this path
                 new_min_capacity = min(min_capacity_so_far, capacity)
@@ -205,7 +204,7 @@ def space_efficient_ford_fulkerson(graph, source, sink):
                 
                 if found:
                     # Add this edge to the path
-                    path.append((u, v, idx))
+                    path.append([u, v, idx])
                     return True, path_capacity, path
         
         return False, 0, []
@@ -224,13 +223,12 @@ def space_efficient_ford_fulkerson(graph, source, sink):
         # Update residual capacities
         for u, v, idx in path:
             # Update forward edge
-            residual_graph[u][idx] = (residual_graph[u][idx][0], residual_graph[u][idx][1] - path_capacity)
+            residual_graph[u][idx] = [residual_graph[u][idx][0], residual_graph[u][idx][1] - path_capacity]
             
             # Find and update reverse edge
-            for rev_idx, (rev_v, rev_cap) in enumerate(residual_graph[v]):
+            for rev_idx, [rev_v, rev_cap] in enumerate(residual_graph[v]):
                 if rev_v == u:
-                    residual_graph[v][rev_idx] = (u, rev_cap + path_capacity)
+                    residual_graph[v][rev_idx] = [u, rev_cap + path_capacity]
                     break
         
     return residual_graph
-
